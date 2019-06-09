@@ -59,7 +59,7 @@ along with Freeminer.  If not, see <http://www.gnu.org/licenses/>.
 #include "version.h"
 #include "drawscene.h"
 #include "database-sqlite3.h"
-//#include "serialization.h"
+#include "serialization.h"
 #include "guiscalingfilter.h"
 
 #include "database.h"
@@ -251,7 +251,7 @@ Client::Client(
 	m_env.setLocalPlayer(new LocalPlayer(this, playername));
 
 	m_mapper = new Mapper(device, this);
-	//m_cache_save_interval = g_settings->getU16("server_map_save_interval");
+	m_cache_save_interval = g_settings->getU16("server_map_save_interval");
 
 	m_cache_smooth_lighting = g_settings->getBool("smooth_lighting");
 	m_cache_enable_shaders  = g_settings->getBool("enable_shaders");
@@ -280,12 +280,12 @@ Client::~Client()
 
 	m_mesh_update_thread.stop();
 	m_mesh_update_thread.wait();
-/*
+
 	while (!m_mesh_update_thread.m_queue_out.empty()) {
 		MeshUpdateResult r = m_mesh_update_thread.m_queue_out.pop_frontNoEx();
 		delete r.mesh;
 	}
-*/
+
 
 	delete m_inventory_from_server;
 
@@ -387,21 +387,21 @@ void Client::step(float dtime)
 				// [51] u16 minimum supported network protocol version (added sometime)
 				// [53] u16 maximum supported network protocol version (added later than the previous one)
 
-				/*
+				
 				char pName[PLAYERNAME_SIZE];
 				char pPassword[PASSWORD_SIZE];
 				memset(pName, 0, PLAYERNAME_SIZE * sizeof(char));
 				memset(pPassword, 0, PASSWORD_SIZE * sizeof(char));
-				*/
+				
 
 				std::string hashed_password = translate_password(myplayer->getName(), m_password);
 
-				/*
+				
 				snprintf(pName, PLAYERNAME_SIZE, "%s", myplayer->getName());
 				snprintf(pPassword, PASSWORD_SIZE, "%s", hashed_password.c_str());
 
 				sendLegacyInit(pName, pPassword);
-				*/
+				
 				sendLegacyInit(myplayer->getName(), hashed_password);
 			}
 			if (CLIENT_PROTOCOL_VERSION_MAX >= 25)
@@ -432,9 +432,9 @@ void Client::step(float dtime)
 			&deleted_blocks))
 			m_map_timer_and_unload_interval.run_next(map_timer_and_unload_dtime);
 
-		/*if(deleted_blocks.size() > 0)
+		if(deleted_blocks.size() > 0)
 			infostream<<"Client: Unloaded "<<deleted_blocks.size()
-					<<" unused blocks"<<std::endl;*/
+					<<" unused blocks"<<std::endl;
 
 		/*
 			Send info to server
@@ -537,12 +537,12 @@ void Client::step(float dtime)
 		int num_processed_meshes = 0;
 		u32 end_ms = porting::getTimeMs() + 10;
 
-		/*
+		
 		auto lock = m_env.getMap().m_blocks.try_lock_shared_rec();
 		if (!lock->owns_lock()) {
 			infostream<<"skip updating meshes"<<std::endl;
 		} else 
-		*/
+		
 		{
 
 		auto qsize = m_mesh_update_thread.m_queue_out.size();
